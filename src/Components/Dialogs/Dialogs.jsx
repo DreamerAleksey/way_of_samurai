@@ -1,38 +1,25 @@
 import React from "react";
 import s from './Dialogs.module.css';
-import {NavLink} from "react-router-dom";
+import DialogItem from "./DialogItem/DialogItem";
+import Message from "./Message/Message";
+import {sendMessageCreator, updateMessageBodyCreator} from "../../redux/dialogsReducer";
 
-const DialogItem = (props) => {
-    const path = '/dialogs/' + props.id;
-    return (
-        <div className={s.dialog + ' ' + s.active}>
-            <NavLink to={path}>{props.name}</NavLink>
-        </div>
-    )
-}
+const Dialogs = (props) => {
 
-const Message = (props) => {
-    return (
-        <div className={s.message}>{props.message}</div>
-    )
-}
+    const state = props.store.getState().dialogsPage;
 
-const Dialogs = () => {
+    const dialogsElements = state.dialogs.map(d => <DialogItem name={d.name} id={d.id}/>);
+    const messagesElements = state.messages.map(m => <Message message={m.message}/>);
+    const newMessageBody = state.newMessageBody;
 
-    const dialogs = [
-        {id: 1, name: 'Vasya'},
-        {id: 2, name: 'Andry'},
-        {id: 3, name: 'Petr'}
-    ];
+    const onSendMessageClick = () => {
+        props.store.dispatch(sendMessageCreator())
+    }
 
-    const messages = [
-        {id: 1, message: 'Hi'},
-        {id: 2, message: '1231231231'},
-        {id: 3, message: 'asdasdasdas'}
-    ];
-
-    const dialogsElements = dialogs.map(d => <DialogItem name={d.name} id={d.id}/>);
-    const messagesElements = messages.map(m => <Message message={m.message}/>)
+    const onNewMessageChange = (e) => {
+        let body = e.target.value;
+        props.store.dispatch(updateMessageBodyCreator(body))
+    }
 
     return (
         <div className={s.dialogs}>
@@ -41,7 +28,20 @@ const Dialogs = () => {
 
             </div>
             <div className={s.messages}>
-                {messagesElements}
+                <div>
+                    {messagesElements}
+                </div>
+                <div>
+                    <div>
+                        <textarea value={newMessageBody}
+                                  onChange={onNewMessageChange}
+                                  placeholder='Enter your message'
+                        />
+                    </div>
+                    <div>
+                        <button onClick={onSendMessageClick}>Send</button>
+                    </div>
+                </div>
             </div>
         </div>
     )
